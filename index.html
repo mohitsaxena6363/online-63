@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class 6 GK Online Exam</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f8ff; padding: 20px; }
+    h1, h2 { text-align: center; color: #0066cc; }
+    .box { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .btn { display: block; width: 100%; padding: 12px; font-size: 16px; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .btn:hover { background: #004999; }
+    input[type="text"], input[type="number"], input[type="password"] {
+      width: 100%; padding: 10px; font-size: 16px;
+      border-radius: 6px; border: 1px solid #ccc; margin-bottom: 10px;
+    }
+    label { display: block; margin-bottom: 5px; }
+    #timer { text-align: right; font-size: 16px; color: red; margin-bottom: 10px; display: none; }
+    #quizForm, #resultSection { display: none; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    th { background: #e0f2ff; }
+
+    /* Hidden Admin Button */
+    #adminAccessBtn {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      opacity: 0.1;
+      z-index: 999;
+    }
+
+    #adminLoginSection, #adminTimeSection { display: none; }
+  </style>
+</head>
+<body>
+  <h1>📝💡 Online Exam</h1>
+
+  <!-- 🔒 Hidden Admin Button -->
+  <button id="adminAccessBtn" onclick="showAdminLogin()">⚙️</button>
+
+  <!-- 🔐 Admin Login Panel -->
+  <div id="adminLoginSection" class="box">
+    <h2>🔐 Admin Login</h2>
+    <label>Enter Admin Password:</label>
+    <input type="password" id="adminPass" placeholder="Enter password" />
+    <button class="btn" onclick="checkAdmin()">Login</button>
+    <p id="passError" style="color:red;display:none;">❌ Incorrect password!</p>
+  </div>
+
+  <!-- ⏱ Admin Time Set Panel -->
+  <div id="adminTimeSection" class="box">
+    <h2>⏱ Set Exam Timer</h2>
+    <label>Time in seconds:</label>
+    <input type="number" id="adminTime" placeholder="e.g. 300" value="300" min="30" />
+    <button class="btn" onclick="setExamTime()">✅ Save & Continue</button>
+  </div>
+
+  <!-- 👩‍🎓 Student Start Section -->
+  <div id="startSection" class="box">
+    <label>🥰 Enter Your Name:</label>
+    <input type="text" id="studentName" placeholder="Your Name" required />
+    <button id="startBtn" class="btn">🎬 Start Exam</button>
+  </div>
+
+  <div id="timer">⏱ Time Left: <span id="time">300</span> seconds</div>
+
+  <form id="quizForm"></form>
+
+  <div id="resultSection">
+    <div class="box">
+      <h2>🎉 Exam Completed</h2>
+      <p><strong>👤 Student Name:</strong> <span id="resName"></span></p>
+      <p><strong>📊 Your Score:</strong> <span id="resScore"></span></p>
+    </div>
+    <h2>📋 Answer Review</h2>
+    <table>
+      <thead>
+        <tr><th>Q.No</th><th>Your Answer</th><th>Correct Answer</th><th>Status</th></tr>
+      </thead>
+      <tbody id="reviewBody"></tbody>
+    </table>
+    <button class="btn" onclick="location.reload()">🔁 Try Again</button>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "admin123";
+    let totalTime = 300;
+    let timerInterval;
+
+    // Admin Button Access
+    function showAdminLogin() {
+      document.getElementById("adminLoginSection").style.display = "block";
+    }
+
+    function checkAdmin() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === ADMIN_PASSWORD) {
+        document.getElementById("adminLoginSection").style.display = "none";
+        document.getElementById("adminTimeSection").style.display = "block";
+      } else {
+        document.getElementById("passError").style.display = "block";
+      }
+    }
+
+    function setExamTime() {
+      let time = document.getElementById("adminTime").value;
+      if (time < 10) return alert("Minimum time is 10 seconds");
+      totalTime = parseInt(time);
+      document.getElementById("adminTimeSection").style.display = "none";
+      alert("⏱ Time updated successfully!");
+    }
+
+    const questions = [
+      { q: "Which planet is known as the Red Planet?", a: ["Mercury", "Mars", "Venus", "Jupiter"], correct: "b" },
+      { q: "Who is the President of India (2025)?", a: ["Narendra Modi", "Droupadi Murmu", "Amit Shah", "Rajnath Singh"], correct: "b" },
+      { q: "What is the capital of Australia?", a: ["Sydney", "Canberra", "Melbourne", "Perth"], correct: "b" },
+      { q: "Which gas do plants use for photosynthesis?", a: ["Oxygen", "Hydrogen", "Nitrogen", "Carbon Dioxide"], correct: "d" },
+      { q: "Who invented the telephone?", a: ["Thomas Edison", "Alexander Graham Bell", "Albert Einstein", "Isaac Newton"], correct: "b" },
+      { q: "What is the national animal of India?", a: ["Elephant", "Lion", "Tiger", "Leopard"], correct: "c" },
+      { q: "How many colors are there in the Indian flag?", a: ["2", "3", "4", "5"], correct: "b" },
+      { q: "What is the currency of Japan?", a: ["Dollar", "Yen", "Euro", "Won"], correct: "b" },
+      { q: "Which is the largest continent?", a: ["Africa", "Asia", "Europe", "Antarctica"], correct: "b" },
+      { q: "Who wrote the national anthem of India?", a: ["Mahatma Gandhi", "Subhash Chandra Bose", "Rabindranath Tagore", "Jawaharlal Nehru"], correct: "c" }
+    ];
+    while (questions.length < 30) {
+      let base = questions[questions.length % 10];
+      questions.push({ ...base, q: base.q + " (Repeat " + (questions.length+1) + ")" });
+    }
+
+    const correctAnswers = {};
+    const quizForm = document.getElementById("quizForm");
+    const optionMap = { a: "A", b: "B", c: "C", d: "D", "Not Answered": "❌" };
+
+    questions.forEach((q, i) => {
+      const qNo = i + 1;
+      const letter = ["a", "b", "c", "d"];
+      correctAnswers[`q${qNo}`] = q.correct;
+
+      const div = document.createElement("div");
+      div.className = "box";
+      div.innerHTML = `<p>${qNo}. ${q.q}</p>` +
+        q.a.map((opt, j) => `<label><input type="radio" name="q${qNo}" value="${letter[j]}"> ${opt}</label>`).join("");
+      quizForm.appendChild(div);
+    });
+    quizForm.innerHTML += `<button type="submit" class="btn">✅ Submit Answers</button>`;
+
+    document.getElementById("startSection").style.display = "block";
+
+    document.getElementById("startBtn").onclick = () => {
+      const name = document.getElementById("studentName").value.trim();
+      if (!name) return alert("Please enter your name");
+      document.getElementById("startSection").style.display = "none";
+      quizForm.style.display = "block";
+      document.getElementById("timer").style.display = "block";
+      document.getElementById("time").textContent = totalTime;
+
+      timerInterval = setInterval(() => {
+        let time = +document.getElementById("time").textContent;
+        document.getElementById("time").textContent = --time;
+        if (time <= 0) {
+          clearInterval(timerInterval);
+          quizForm.dispatchEvent(new Event("submit"));
+        }
+      }, 1000);
+    };
+
+    quizForm.onsubmit = function (e) {
+      e.preventDefault();
+      clearInterval(timerInterval);
+      const name = document.getElementById("studentName").value.trim();
+      let score = 0;
+      let userAnswers = {};
+      questions.forEach((_, i) => {
+        let qid = `q${i+1}`;
+        let selected = document.querySelector(`input[name="${qid}"]:checked`);
+        let ans = selected ? selected.value : "Not Answered";
+        userAnswers[qid] = ans;
+        if (ans === correctAnswers[qid]) score++;
+      });
+
+      quizForm.style.display = "none";
+      document.getElementById("timer").style.display = "none";
+      document.getElementById("resultSection").style.display = "block";
+      document.getElementById("resName").textContent = name;
+      document.getElementById("resScore").textContent = `${score}/30`;
+
+      const tbody = document.getElementById("reviewBody");
+      tbody.innerHTML = "";
+      questions.forEach((_, i) => {
+        let qid = `q${i+1}`;
+        let userAns = userAnswers[qid];
+        let correct = correctAnswers[qid];
+        let isCorrect = userAns === correct;
+        tbody.innerHTML += `<tr>
+          <td>Q${i+1}</td>
+          <td>${optionMap[userAns] || userAns}</td>
+          <td>${optionMap[correct]}</td>
+          <td style="color:${isCorrect ? 'green' : 'red'}">${isCorrect ? '✅ Correct' : '❌ Wrong'}</td>
+        </tr>`;
+      });
+    };
+  </script>
+</body>
+</html>
