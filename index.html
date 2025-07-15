@@ -8,7 +8,7 @@
     body { font-family: Arial, sans-serif; background: #f0f8ff; padding: 20px; }
     h1, h2 { text-align: center; color: #0066cc; }
     .box { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .btn { display: block; width: 100%; padding: 12px; font-size: 16px; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .btn { display: block; width: 100%; padding: 12px; font-size: 16px; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
     .btn:hover { background: #004999; }
     input[type="text"], input[type="number"], input[type="password"] {
       width: 98%; padding: 15px; font-size: 16px;
@@ -71,14 +71,24 @@
       <h2>🎉 Exam Completed</h2>
       <p><strong>👤 Student Name:</strong> <span id="resName"></span></p>
       <p><strong>📊 Your Score:</strong> <span id="resScore"></span></p>
+      <button class="btn" onclick="showReview()">🔍 Review Answers</button>
     </div>
-    <h2>📋 Answer Review</h2>
-    <table>
-      <thead>
-        <tr><th>Q.No</th><th>Your Answer</th><th>Correct Answer</th><th>Status</th></tr>
-      </thead>
-      <tbody id="reviewBody"></tbody>
-    </table>
+
+    <div id="reviewTableWrapper" style="display: none;">
+      <h2>📋 Answer Review</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Q.No</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="reviewBody"></tbody>
+      </table>
+    </div>
+
     <button class="btn" onclick="location.reload()">🔁 Try Again</button>
   </div>
 
@@ -214,6 +224,10 @@
         </tr>`;
       });
     };
+
+    function showReview() {
+      document.getElementById("reviewTableWrapper").style.display = "block";
+    }
   </script>
 </body>
 </html>
